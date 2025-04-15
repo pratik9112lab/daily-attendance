@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,30 +5,68 @@
   <title>Daily Attendance</title>
   <style>
     body { font-family: sans-serif; padding: 2rem; }
-    input, button { padding: 0.5rem; margin-top: 1rem; }
+    input, button { padding: 0.5rem; margin-top: 1rem; margin-right: 0.5rem; }
     table { margin-top: 2rem; width: 100%; border-collapse: collapse; }
-    td, th { border: 1px solid #ddd; padding: 8px; }
+    td, th { border: 1px solid #ddd; padding: 8px; text-align: center; }
   </style>
 </head>
 <body>
   <h1>Daily Attendance</h1>
   <input type="text" id="name" placeholder="Enter your name">
-  <button onclick="markAttendance()">Mark Attendance</button>
+  <button onclick="markEntry()">Mark Entry</button>
+  <button onclick="markExit()">Mark Exit</button>
 
   <table id="attendanceTable">
     <thead>
-      <tr><th>Name</th><th>Date</th><th>Time</th></tr>
+      <tr><th>Name</th><th>Date</th><th>Entry Time</th><th>Exit Time</th></tr>
     </thead>
     <tbody></tbody>
   </table>
 
   <script>
-    function markAttendance() {
-      const name = document.getElementById('name').value;
+    const attendanceData = {};
+
+    function markEntry() {
+      const name = document.getElementById('name').value.trim();
       if (!name) return alert('Enter your name!');
+
       const now = new Date();
-      const row = `<tr><td>${name}</td><td>${now.toLocaleDateString()}</td><td>${now.toLocaleTimeString()}</td></tr>`;
-      document.querySelector("#attendanceTable tbody").innerHTML += row;
+      const date = now.toLocaleDateString();
+
+      attendanceData[name] = {
+        date: date,
+        entry: now.toLocaleTimeString(),
+        exit: ''
+      };
+
+      renderTable();
+    }
+
+    function markExit() {
+      const name = document.getElementById('name').value.trim();
+      if (!name || !attendanceData[name]) {
+        return alert('Entry not found for this name!');
+      }
+
+      const now = new Date();
+      attendanceData[name].exit = now.toLocaleTimeString();
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.querySelector('#attendanceTable tbody');
+      tbody.innerHTML = '';
+
+      for (const name in attendanceData) {
+        const row = attendanceData[name];
+        const tr = `<tr>
+                      <td>${name}</td>
+                      <td>${row.date}</td>
+                      <td>${row.entry}</td>
+                      <td>${row.exit || '-'}</td>
+                    </tr>`;
+        tbody.innerHTML += tr;
+      }
     }
   </script>
 </body>
