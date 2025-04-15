@@ -1,0 +1,36 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Daily Attendance</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; }
+    input, button { padding: 0.5rem; margin-top: 1rem; }
+    table { margin-top: 2rem; width: 100%; border-collapse: collapse; }
+    td, th { border: 1px solid #ddd; padding: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Daily Attendance</h1>
+  <input type="text" id="name" placeholder="Enter your name">
+  <button onclick="markAttendance()">Mark Attendance</button>
+
+  <table id="attendanceTable">
+    <thead>
+      <tr><th>Name</th><th>Date</th><th>Time</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    function markAttendance() {
+      const name = document.getElementById('name').value;
+      if (!name) return alert('Enter your name!');
+      const now = new Date();
+      const row = `<tr><td>${name}</td><td>${now.toLocaleDateString()}</td><td>${now.toLocaleTimeString()}</td></tr>`;
+      document.querySelector("#attendanceTable tbody").innerHTML += row;
+    }
+  </script>
+</body>
+</html>
