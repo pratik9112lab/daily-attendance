@@ -70,6 +70,12 @@
       const today = new Date();
       return today.toLocaleDateString();
     }
+// Entry API Call
+fetch('https://attendance-api.up.railway.app/entry', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ name, designation, date: getTodayDate(), entry: new Date().toLocaleTimeString() })
+});
 
     function markEntry() {
       const name = document.getElementById('name').value.trim();
@@ -91,6 +97,12 @@
       }
       renderTable();
     }
+// Exit API Call
+fetch('https://attendance-api.up.railway.app/exit', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ name, date: getTodayDate(), exit: new Date().toLocaleTimeString() })
+});
 
     function markExit() {
       const name = document.getElementById('name').value.trim();
