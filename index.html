@@ -1,58 +1,128 @@
-<script>
-  const api = "http://localhost:3000";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Attendance App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    img.logo {
+      max-width: 300px;
+      display: block;
+      margin: 0 auto 20px;
+    }
+    input, button {
+      padding: 10px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    th {
+      background-color: #333;
+      color: white;
+    }
+  </style>
+</head>
+<body>
 
-  function getDate() {
-    const now = new Date();
-    return now.toLocaleDateString();
-  }
+  <!-- Logo -->
+  <img src="image.png" alt="Logo" class="logo">
 
-  function markEntry() {
-    const name = document.getElementById('name').value.trim();
-    if (!name) return alert('Enter your name!');
-    
-    fetch(`${api}/entry`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name,
-        date: getDate(),
-        entryTime: new Date().toLocaleTimeString()
-      })
-    }).then(() => fetchRecords());
-  }
+  <h2>Daily Attendance</h2>
 
-  function markExit() {
-    const name = document.getElementById('name').value.trim();
-    if (!name) return alert('Enter your name!');
-    
-    fetch(`${api}/exit`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name,
-        date: getDate(),
-        exitTime: new Date().toLocaleTimeString()
-      })
-    }).then(() => fetchRecords());
-  }
+  <!-- Input Fields -->
+  <input type="text" id="name" placeholder="Employee Name">
+  <input type="text" id="designation" placeholder="Designation (Optional)">
+  <button onclick="markEntry()">Mark Entry</button>
+  <button onclick="markExit()">Mark Exit</button>
 
-  function fetchRecords() {
-    fetch(`${api}/attendance`)
-      .then(res => res.json())
-      .then(data => {
-        const tbody = document.querySelector('#attendanceTable tbody');
-        tbody.innerHTML = '';
-        data.forEach(row => {
-          tbody.innerHTML += `<tr>
-            <td>${row.name}</td>
-            <td>${row.date}</td>
-            <td>${row.entry || '-'}</td>
-            <td>${row.exit || '-'}</td>
-          </tr>`;
+  <!-- Attendance Table -->
+  <table>
+    <thead>
+      <tr>
+        <th>S.No</th>
+        <th>Name</th>
+        <th>Designation</th>
+        <th>Date</th>
+        <th>Entry Time</th>
+        <th>Exit Time</th>
+      </tr>
+    </thead>
+    <tbody id="attendanceBody"></tbody>
+  </table>
+
+  <script>
+    const attendanceData = [];
+
+    function getTodayDate() {
+      const today = new Date();
+      return today.toLocaleDateString();
+    }
+
+    function markEntry() {
+      const name = document.getElementById('name').value.trim();
+      const designation = document.getElementById('designation').value.trim();
+      if (!name) return alert("Please enter a name!");
+
+      const existing = attendanceData.find(item => item.name === name && item.date === getTodayDate());
+      if (!existing) {
+        attendanceData.push({
+          name,
+          designation: designation || '-',
+          date: getTodayDate(),
+          entry: new Date().toLocaleTimeString(),
+          exit: '-'
         });
-      });
-  }
+      } else {
+        existing.entry = new Date().toLocaleTimeString();
+        if (designation) existing.designation = designation;
+      }
+      renderTable();
+    }
 
-  // Auto-load on page open
-  window.onload = fetchRecords;
-</script>
+    function markExit() {
+      const name = document.getElementById('name').value.trim();
+      if (!name) return alert("Please enter a name!");
+
+      const existing = attendanceData.find(item => item.name === name && item.date === getTodayDate());
+      if (existing) {
+        existing.exit = new Date().toLocaleTimeString();
+        renderTable();
+      } else {
+        alert("No entry record found for today.");
+      }
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('attendanceBody');
+      tbody.innerHTML = '';
+      attendanceData.forEach((item, index) => {
+        const row = `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${item.name}</td>
+            <td>${item.designation}</td>
+            <td>${item.date}</td>
+            <td>${item.entry}</td>
+            <td>${item.exit}</td>
+          </tr>
+        `;
+        tbody.innerHTML += row;
+      });
+    }
+  </script>
+
+</body>
+</html>
