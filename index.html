@@ -1,73 +1,58 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Daily Attendance</title>
-  <style>
-    body { font-family: sans-serif; padding: 2rem; }
-    input, button { padding: 0.5rem; margin-top: 1rem; margin-right: 0.5rem; }
-    table { margin-top: 2rem; width: 100%; border-collapse: collapse; }
-    td, th { border: 1px solid #ddd; padding: 8px; text-align: center; }
-  </style>
-</head>
-<body>
-  <h1>Daily Attendance</h1>
-  <input type="text" id="name" placeholder="Enter your name">
-  <button onclick="markEntry()">Mark Entry</button>
-  <button onclick="markExit()">Mark Exit</button>
+<script>
+  const api = "http://localhost:3000";
 
-  <table id="attendanceTable">
-    <thead>
-      <tr><th>Name</th><th>Date</th><th>Entry Time</th><th>Exit Time</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  function getDate() {
+    const now = new Date();
+    return now.toLocaleDateString();
+  }
 
-  <script>
-    const attendanceData = {};
+  function markEntry() {
+    const name = document.getElementById('name').value.trim();
+    if (!name) return alert('Enter your name!');
+    
+    fetch(`${api}/entry`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name,
+        date: getDate(),
+        entryTime: new Date().toLocaleTimeString()
+      })
+    }).then(() => fetchRecords());
+  }
 
-    function markEntry() {
-      const name = document.getElementById('name').value.trim();
-      if (!name) return alert('Enter your name!');
+  function markExit() {
+    const name = document.getElementById('name').value.trim();
+    if (!name) return alert('Enter your name!');
+    
+    fetch(`${api}/exit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name,
+        date: getDate(),
+        exitTime: new Date().toLocaleTimeString()
+      })
+    }).then(() => fetchRecords());
+  }
 
-      const now = new Date();
-      const date = now.toLocaleDateString();
+  function fetchRecords() {
+    fetch(`${api}/attendance`)
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.querySelector('#attendanceTable tbody');
+        tbody.innerHTML = '';
+        data.forEach(row => {
+          tbody.innerHTML += `<tr>
+            <td>${row.name}</td>
+            <td>${row.date}</td>
+            <td>${row.entry || '-'}</td>
+            <td>${row.exit || '-'}</td>
+          </tr>`;
+        });
+      });
+  }
 
-      attendanceData[name] = {
-        date: date,
-        entry: now.toLocaleTimeString(),
-        exit: ''
-      };
-
-      renderTable();
-    }
-
-    function markExit() {
-      const name = document.getElementById('name').value.trim();
-      if (!name || !attendanceData[name]) {
-        return alert('Entry not found for this name!');
-      }
-
-      const now = new Date();
-      attendanceData[name].exit = now.toLocaleTimeString();
-      renderTable();
-    }
-
-    function renderTable() {
-      const tbody = document.querySelector('#attendanceTable tbody');
-      tbody.innerHTML = '';
-
-      for (const name in attendanceData) {
-        const row = attendanceData[name];
-        const tr = `<tr>
-                      <td>${name}</td>
-                      <td>${row.date}</td>
-                      <td>${row.entry}</td>
-                      <td>${row.exit || '-'}</td>
-                    </tr>`;
-        tbody.innerHTML += tr;
-      }
-    }
-  </script>
-</body>
-</html>
+  // Auto-load on page open
+  window.onload = fetchRecords;
+</script>
