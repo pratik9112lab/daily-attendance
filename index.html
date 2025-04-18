@@ -1,140 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Attendance App</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Daily Attendance</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: #f4f4f4;
+      padding: 1rem;
+      background: #f5f5f5;
     }
     img.logo {
-      max-width: 300px;
-      display: block;
-      margin: 0 auto 20px;
-    }
-    input, button {
-      padding: 10px;
-      margin-right: 10px;
-      margin-bottom: 10px;
+      width: 120px;
+      margin-bottom: 20px;
     }
     table {
       width: 100%;
-      margin-top: 20px;
       border-collapse: collapse;
+      background: #fff;
     }
     th, td {
-      padding: 8px;
-      border: 1px solid #ccc;
+      padding: 10px;
+      border: 1px solid #ddd;
       text-align: center;
     }
     th {
-      background-color: #333;
-      color: white;
+      background: #333;
+      color: #fff;
+    }
+    .short-working {
+      background-color: #fff3cd;
+    }
+    .tag {
+      color: #b10000;
+      font-weight: bold;
+    }
+    input, button {
+      padding: 8px;
+      margin-right: 10px;
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
 
-  <!-- Logo -->
-  <img src="image.jpg" alt="Logo" class="logo">
+  <img src="logo.jpg" alt="Logo" class="logo" />
 
   <h2>Daily Attendance</h2>
 
-  <!-- Input Fields -->
-  <input type="text" id="name" placeholder="Employee Name">
-  <input type="text" id="designation" placeholder="Designation (Optional)">
+  <input type="text" id="name" placeholder="Employee Name" />
+  <input type="text" id="designation" placeholder="Designation (optional)" />
   <button onclick="markEntry()">Mark Entry</button>
   <button onclick="markExit()">Mark Exit</button>
 
-  <!-- Attendance Table -->
   <table>
     <thead>
       <tr>
-        <th>S.No</th>
+        <th>S. No</th>
         <th>Name</th>
         <th>Designation</th>
         <th>Date</th>
         <th>Entry Time</th>
         <th>Exit Time</th>
+        <th>Total Hours</th>
+        <th>Status</th>
       </tr>
     </thead>
-    <tbody id="attendanceBody"></tbody>
+    <tbody id="attendanceBody">
+    </tbody>
   </table>
 
   <script>
     const attendanceData = [];
 
     function getTodayDate() {
-      const today = new Date();
-      return today.toLocaleDateString();
-    }
-// Entry API Call
-fetch('https://attendance-api.up.railway.app/entry', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ name, designation, date: getTodayDate(), entry: new Date().toLocaleTimeString() })
-});
-
-    function markEntry() {
-      const name = document.getElementById('name').value.trim();
-      const designation = document.getElementById('designation').value.trim();
-      if (!name) return alert("Please enter a name!");
-
-      const existing = attendanceData.find(item => item.name === name && item.date === getTodayDate());
-      if (!existing) {
-        attendanceData.push({
-          name,
-          designation: designation || '-',
-          date: getTodayDate(),
-          entry: new Date().toLocaleTimeString(),
-          exit: '-'
-        });
-      } else {
-        existing.entry = new Date().toLocaleTimeString();
-        if (designation) existing.designation = designation;
-      }
-      renderTable();
-    }
-// Exit API Call
-fetch('https://attendance-api.up.railway.app/exit', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ name, date: getTodayDate(), exit: new Date().toLocaleTimeString() })
-});
-
-    function markExit() {
-      const name = document.getElementById('name').value.trim();
-      if (!name) return alert("Please enter a name!");
-
-      const existing = attendanceData.find(item => item.name === name && item.date === getTodayDate());
-      if (existing) {
-        existing.exit = new Date().toLocaleTimeString();
-        renderTable();
-      } else {
-        alert("No entry record found for today.");
-      }
+      return new Date().toISOString().split('T')[0];
     }
 
-    function renderTable() {
-      const tbody = document.getElementById('attendanceBody');
-      tbody.innerHTML = '';
-      attendanceData.forEach((item, index) => {
-        const row = `
-          <tr>
-            <td>${index + 1}</td>
-            <td>${item.name}</td>
-            <td>${item.designation}</td>
-            <td>${item.date}</td>
-            <td>${item.entry}</td>
-            <td>${item.exit}</td>
-          </tr>
-        `;
-        tbody.innerHTML += row;
-      });
-    }
-  </script>
-
-</body>
-</html>
+    function getCurrentTime() {
+      return new Date().toLocaleTimeString('en
