@@ -78,4 +78,66 @@
     }
 
     function getCurrentTime() {
-      return new Date().toLocaleTimeString('en
+      return new Date().toLocaleTimeString('en-GB'); // 24-hour format
+    }
+
+    function calculateHours(entry, exit) {
+      if (!entry || !exit) return '';
+      const [eH, eM, eS] = entry.split(':').map(Number);
+      const [xH, xM, xS] = exit.split(':').map(Number);
+
+      const entryDate = new Date(0, 0, 0, eH, eM, eS);
+      const exitDate = new Date(0, 0, 0, xH, xM, xS);
+
+      const diffMs = exitDate - entryDate;
+      const diffHrs = diffMs / (1000 * 60 * 60);
+      return diffHrs.toFixed(2);
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('attendanceBody');
+      tbody.innerHTML = '';
+      attendanceData.forEach((record, i) => {
+        const hours = calculateHours(record.entry, record.exit);
+        const isShort = hours && hours < 9;
+        const row = `
+          <tr class="${isShort ? 'short-working' : ''}">
+            <td>${i + 1}</td>
+            <td>${record.name}</td>
+            <td>${record.designation || '-'}</td>
+            <td>${record.date}</td>
+            <td>${record.entry || '-'}</td>
+            <td>${record.exit || '-'}</td>
+            <td>${hours || '-'}</td>
+            <td>${isShort ? '<span class="tag">Short Working</span>' : ''}</td>
+          </tr>
+        `;
+        tbody.innerHTML += row;
+      });
+    }
+
+    function markEntry() {
+      const name = document.getElementById('name').value.trim();
+      const designation = document.getElementById('designation').value.trim();
+      if (!name) return alert('Please enter name');
+      attendanceData.push({
+        name,
+        designation,
+        date: getTodayDate(),
+        entry: getCurrentTime(),
+        exit: ''
+      });
+      renderTable();
+    }
+
+    function markExit() {
+      const name = document.getElementById('name').value.trim();
+      const record = attendanceData.find(r => r.name === name && !r.exit);
+      if (!record) return alert('Entry not found or already marked exit');
+      record.exit = getCurrentTime();
+      renderTable();
+    }
+  </script>
+
+</body>
+</html>
