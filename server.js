@@ -2,24 +2,24 @@ const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
 
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// MySQL DB connection
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: 'your_mysql_password',
+  password: 'Noida@911', // ← replace with your actual password
   database: 'attendance'
 });
 
 db.connect(err => {
   if (err) throw err;
-  console.log("MySQL connected");
+  console.log('MySQL connected');
 });
 
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-// Add Entry
+// Entry route
 app.post('/entry', (req, res) => {
   const { name, designation, date, entry } = req.body;
   db.query(
@@ -32,8 +32,7 @@ app.post('/entry', (req, res) => {
   );
 });
 
-
-// Update Exit Time
+// Exit route
 app.post('/exit', (req, res) => {
   const { name, date, exit } = req.body;
   db.query(
@@ -46,7 +45,7 @@ app.post('/exit', (req, res) => {
   );
 });
 
-// Get all records
+// Get all attendance records
 app.get('/attendance', (req, res) => {
   db.query(`SELECT * FROM attendance`, (err, results) => {
     if (err) return res.status(500).send(err.message);
@@ -54,6 +53,6 @@ app.get('/attendance', (req, res) => {
   });
 });
 
-
+// Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
